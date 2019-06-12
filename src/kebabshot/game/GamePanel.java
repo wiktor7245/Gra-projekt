@@ -4,11 +4,14 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
+import javax.swing.*;
 
 public class GamePanel extends Canvas implements Runnable {
 
@@ -20,6 +23,8 @@ public class GamePanel extends Canvas implements Runnable {
     private int currentPos;
     private int zycia = 5;
     private int wynik;
+    private String name;
+    ArrayList<Integer> keys=new ArrayList();
     
     private ArrayList<Kula> kule = new ArrayList<>();
     private ArrayList<Hamburger> hamburgery = new ArrayList<>();
@@ -30,33 +35,38 @@ public class GamePanel extends Canvas implements Runnable {
     }
 
     @Override
+    protected void onKeyUp(KeyEvent event) {
+        if(keys.contains(event.getKeyCode())){
+            keys.remove(keys.indexOf(event.getKeyCode()));
+        }
+    }
+
+    @Override
+    protected void onKeyPressed(KeyEvent event) {
+        if(!keys.contains(event.getKeyCode())){
+            keys.add(event.getKeyCode());
+        }else if(keys.contains(KeyEvent.VK_RIGHT) && keys.contains(KeyEvent.VK_X)){
+            kebabgun.moveRight();
+            kule.add(new Kula(kebabgun.getX()+20,kebabgun.getY(),getRandomSpeed()));kule.add(new Kula(kebabgun.getX()+20,kebabgun.getY(),getRandomSpeed()));
+        }else if(keys.contains(KeyEvent.VK_LEFT) && keys.contains(KeyEvent.VK_X)){
+            kebabgun.moveLeft();
+            kule.add(new Kula(kebabgun.getX()+20,kebabgun.getY(),getRandomSpeed()));kule.add(new Kula(kebabgun.getX()+20,kebabgun.getY(),getRandomSpeed()));
+        }else if(keys.contains(KeyEvent.VK_RIGHT)){
+            kebabgun.moveRight();
+        }else if(keys.contains(KeyEvent.VK_X)){
+            kule.add(new Kula(kebabgun.getX()+20,kebabgun.getY(),getRandomSpeed()));
+        }else if(keys.contains(KeyEvent.VK_LEFT)){
+            kebabgun.moveLeft();
+        }
+    }
+
+    @Override
     public void addNotify() {
         super.addNotify();
         if (gameThread == null) {
             gameThread = new Thread(GamePanel.this);
         }
         gameThread.start();
-    }
-
-    @Override
-    protected void onKeyUp(KeyEvent event) {
-    	kebabgun.resetSpeed();
-    }
-
-    @Override
-    protected void onKeyPressed(KeyEvent event) {
-        if (event.getKeyCode() == KeyEvent.VK_SPACE) {
-        	kule.add(new Kula(kebabgun.getX()+20,kebabgun.getY(),getRandomSpeed()));
-        	//kebabgun.shoot();
-        } else if (event.getKeyCode() == KeyEvent.VK_LEFT) {
-            kebabgun.moveLeft();
-        } else if (event.getKeyCode() == KeyEvent.VK_RIGHT) {
-            kebabgun.moveRight();
-        } else if(event.getKeyCode() == KeyEvent.VK_ESCAPE){
-        	System.exit(0);
-        }else{
-        	
-        }
     }
 
     private int getRandomSpeed() {
@@ -89,6 +99,9 @@ public class GamePanel extends Canvas implements Runnable {
     @Override
     public void run() {
         init();
+        if (!options()){
+            System.exit(0);
+        }
         while (isRunning) {
 
             long startTime = System.currentTimeMillis();
@@ -104,6 +117,19 @@ public class GamePanel extends Canvas implements Runnable {
             } catch (Exception e) {
             }
         }
+    }
+
+    private boolean options() {
+        JFrame frame = new JFrame("Welcome");
+
+        // prompt the user to enter their name
+        name = JOptionPane.showInputDialog(frame, "What's your name?");
+        if(name != null){
+            return true;
+        }
+            // get the user's input. note that if they press Cancel, 'name' will be null
+            System.out.printf("The user's name is '%s'.\n", name);
+        return false;
     }
 
     private void init() {
@@ -157,7 +183,20 @@ public class GamePanel extends Canvas implements Runnable {
     			bomby.remove(bomba);
     		}
     		else if (zycia == 0){
-    				//isRunning = false;
+    		    //you can make it in a different way
+                System.out.println(name);
+                try{
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection con= DriverManager.getConnection(
+                            "jdbc:mysql://localhost:3306/Gra","root","");
+                    Statement stmt=con.createStatement();
+                    String x = Integer.toString(wynik);
+                    stmt.executeUpdate("INSERT INTO user " + "VALUES ('"+x+"')");
+                    ResultSet rs2=stmt.executeQuery("select * from user");
+                    while(rs2.next())
+                        System.out.println(rs2.getString(1));
+                    con.close();
+                }catch(Exception e){ System.out.println(e);}
     			JOptionPane pane = new JOptionPane();
     			int result = pane.showConfirmDialog(this, "You lose. Play again?");
     			if ( result == JOptionPane.OK_OPTION ) {
