@@ -182,16 +182,12 @@ public class GamePanel extends Canvas implements Runnable {
     		bomba.update();
     		
     		if(kebabgun.getBound().intersects(bomba.getBound()) && zycia > 0){
-    		    System.out.println(waitTime);
-                System.out.println(endTime);
     			zycia--;
     			bomby.remove(bomba);
     		}
     		else if (zycia == 0){
     		    //you can make it in a different way
-                System.out.println(name);
                 end = System.currentTimeMillis() - start;
-                System.out.println(end/1000);
                 try{
                     Class.forName("com.mysql.cj.jdbc.Driver");
                     Connection con= DriverManager.getConnection(
@@ -199,7 +195,7 @@ public class GamePanel extends Canvas implements Runnable {
                     Statement stmt=con.createStatement();
                     //String x = Integer.toString(wynik);
                     stmt.executeUpdate("INSERT INTO gameval " + "VALUES ('"+end+"','"+name+"', '"+wynik+"' )");
-                    ResultSet rs2=stmt.executeQuery("select * from user");
+                    ResultSet rs2=stmt.executeQuery("select * from gameval");
                     while(rs2.next())
                         System.out.println(rs2.getString(1));
                     con.close();
