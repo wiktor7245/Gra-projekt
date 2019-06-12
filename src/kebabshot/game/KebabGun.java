@@ -31,8 +31,6 @@ public class KebabGun extends Sprite {
         }
         incSpeed();
         setX(getX() - getSpeed());
-
-        System.out.println("moveLeft");
     }
 
     public void moveRight() {
@@ -41,7 +39,6 @@ public class KebabGun extends Sprite {
         }
         incSpeed();
         setX(getX() + getSpeed());
-        System.out.println("moveRight");
     }
     
     private void incSpeed() {

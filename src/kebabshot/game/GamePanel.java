@@ -22,8 +22,11 @@ public class GamePanel extends Canvas implements Runnable {
     private final int hampos [] = {0,45,100,150}; //pozycje hamburgerow
     private int currentPos;
     private int zycia = 5;
-    private int wynik;
+    private long wynik;
     private String name;
+    private long startTime,endTime,waitTime;
+    private double start,end;
+
     ArrayList<Integer> keys=new ArrayList();
     
     private ArrayList<Kula> kule = new ArrayList<>();
@@ -102,19 +105,20 @@ public class GamePanel extends Canvas implements Runnable {
         if (!options()){
             System.exit(0);
         }
+        start = System.currentTimeMillis();
         while (isRunning) {
 
-            long startTime = System.currentTimeMillis();
+            startTime = System.currentTimeMillis();
 
             updateGame();
             renderGame();
 
-            long endTime = System.currentTimeMillis() - startTime;
-            long waitTime = (MILLISECOND / FPS) - endTime / MILLISECOND;
+            endTime = System.currentTimeMillis() - startTime;
+            waitTime = (MILLISECOND / FPS) - endTime / MILLISECOND;
 
             try {
                 Thread.sleep(waitTime);
-            } catch (Exception e) {
+            } catch (Exception ignored) {
             }
         }
     }
@@ -146,14 +150,13 @@ public class GamePanel extends Canvas implements Runnable {
     	for(int i=0;i<hamburgery.size();i++){
     		Hamburger hamburger = hamburgery.get(i);
     		hamburger.update();
-    		
-    		for(int j=0;j<kule.size();j++){
-        		Kula kula = kule.get(j);
-        		if(hamburger.getBound().intersects(kula.getBound())){
-        			hamburgery.remove(hamburger);
-        			wynik++;
-        		}
-    		}
+
+            for (Kula kula : kule) {
+                if (hamburger.getBound().intersects(kula.getBound())) {
+                    hamburgery.remove(hamburger);
+                    wynik++;
+                }
+            }
     		
     		if(hamburger.getX() == new Random().nextInt(500) || hamburger.getX() == new Random().nextInt(250)){
         		bomby.add(new Bomba(hamburger.getX()+20,hamburger.getY(),getRandomSpeed()));
@@ -179,26 +182,29 @@ public class GamePanel extends Canvas implements Runnable {
     		bomba.update();
     		
     		if(kebabgun.getBound().intersects(bomba.getBound()) && zycia > 0){
+    		    System.out.println(waitTime);
+                System.out.println(endTime);
     			zycia--;
     			bomby.remove(bomba);
     		}
     		else if (zycia == 0){
     		    //you can make it in a different way
                 System.out.println(name);
+                end = System.currentTimeMillis() - start;
+                System.out.println(end/1000);
                 try{
                     Class.forName("com.mysql.cj.jdbc.Driver");
                     Connection con= DriverManager.getConnection(
                             "jdbc:mysql://localhost:3306/Gra","root","");
                     Statement stmt=con.createStatement();
-                    String x = Integer.toString(wynik);
-                    stmt.executeUpdate("INSERT INTO user " + "VALUES ('"+x+"')");
+                    //String x = Integer.toString(wynik);
+                    stmt.executeUpdate("INSERT INTO gameval " + "VALUES ('"+end+"','"+name+"', '"+wynik+"' )");
                     ResultSet rs2=stmt.executeQuery("select * from user");
                     while(rs2.next())
                         System.out.println(rs2.getString(1));
                     con.close();
                 }catch(Exception e){ System.out.println(e);}
-    			JOptionPane pane = new JOptionPane();
-    			int result = pane.showConfirmDialog(this, "You lose. Play again?");
+    			int result = JOptionPane.showConfirmDialog(this, "You lose. Play again?");
     			if ( result == JOptionPane.OK_OPTION ) {
 					zycia = 5;
 					wynik = 0;
