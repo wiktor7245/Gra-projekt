@@ -151,8 +151,9 @@ public class GamePanel extends Canvas implements Runnable {
     		Hamburger hamburger = hamburgery.get(i);
     		hamburger.update();
 
-            for (Kula kula : kule) {
-                if (hamburger.getBound().intersects(kula.getBound())) {
+            for(int j=0;j<kule.size();j++){
+                Kula kula = kule.get(j);
+                if(hamburger.getBound().intersects(kula.getBound())){
                     hamburgery.remove(hamburger);
                     wynik++;
                 }
