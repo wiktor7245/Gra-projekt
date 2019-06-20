@@ -20,10 +20,6 @@ public class KebabGun extends Sprite {
         g2D.drawImage(this.image, getX(), getY(), null);
     }
 
-    public void shoot() {
-    	
-    	System.out.println("XD");
-    }
 
     public void moveLeft() {
         if (getX() < 0) {

@@ -37,7 +37,8 @@ public abstract class Sprite implements Helper{
         this.speed = speed;
     }
     
-    
+
+
     protected abstract void draw(Graphics2D g2D);
     
 

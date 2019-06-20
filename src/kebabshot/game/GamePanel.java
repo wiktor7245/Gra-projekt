@@ -1,8 +1,8 @@
 package kebabshot.game;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -22,10 +22,16 @@ public class GamePanel extends Canvas implements Runnable {
     private final int hampos [] = {0,45,100,150}; //pozycje hamburgerow
     private int currentPos;
     private int zycia = 5;
+    int result = 0;
     private long wynik;
     private String name;
     private long startTime,endTime,waitTime;
     private double start,end;
+    Object[][] data;
+
+    String[] columnNames = {"Name",
+            "Score",
+            "Time",};
 
     ArrayList<Integer> keys=new ArrayList();
     
@@ -196,17 +202,50 @@ public class GamePanel extends Canvas implements Runnable {
                     Statement stmt=con.createStatement();
                     //String x = Integer.toString(wynik);
                     stmt.executeUpdate("INSERT INTO gameval " + "VALUES ('"+end+"','"+name+"', '"+wynik+"' )");
-                    ResultSet rs2=stmt.executeQuery("select * from gameval");
-                    while(rs2.next())
-                        System.out.println(rs2.getString(1));
+                    int xdd =1;
+                    ResultSet rs1=stmt.executeQuery("SELECT * FROM gameval ORDER BY score DESC LIMIT 5");
+                    ResultSet rs2=rs1;
+                    ResultSet rs3=rs1;
+                    ResultSet rs4=rs1;
+                    ResultSet rs5=rs1;
+                    rs1.absolute(1);
+                    rs2.absolute(2);
+                    rs2.absolute(3);
+                    rs2.absolute(4);
+                    rs2.absolute(5);
+                    data = new Object[][]{
+                            {rs1.getString(2), rs1.getInt(3), rs1.getDouble(1)},
+                            {rs2.getString(2), rs2.getInt(3), rs2.getDouble(1)},
+                            {rs3.getString(2), rs3.getInt(3), rs3.getDouble(1)},
+                            {rs4.getString(2), rs4.getInt(3), rs4.getDouble(1)},
+                            {rs5.getString(2), rs5.getInt(3), rs5.getDouble(1)},
+                    };
                     con.close();
                 }catch(Exception e){ System.out.println(e);}
-    			int result = JOptionPane.showConfirmDialog(this, "You lose. Play again?");
-    			if ( result == JOptionPane.OK_OPTION ) {
-					zycia = 5;
-					wynik = 0;
-				}else {
-					System.exit(0);
+    			//int result = JOptionPane.showConfirmDialog(this, "You lose. Play again?");
+                final JTable table = new JTable(data, columnNames);
+                JPanel jPanel = new JPanel();
+                jPanel.setLayout(new GridLayout());
+                JScrollPane sp = new JScrollPane(table);
+                JButton btn = new JButton();
+                btn.setText("Close");
+                jPanel.add(sp);
+                jPanel.add(btn);
+                btn.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        result = 1;
+                    }
+                });
+                JDialog jdialog = new JDialog();
+                jdialog.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                jdialog.setContentPane(jPanel);
+                jdialog.pack();
+                if ( result == 0 ) {
+                    jdialog.setVisible(true);
+                    result = 3;
+				}else if(result == 1){
+                    System.exit(0);
 				}
     			
     		}
@@ -216,7 +255,8 @@ public class GamePanel extends Canvas implements Runnable {
     		}
     	}
     }
-    
+
+
 	private int getHamYPostion() {
     	if(currentPos >= hampos.length){
     		currentPos = 0;
@@ -227,5 +267,6 @@ public class GamePanel extends Canvas implements Runnable {
 	private void renderGame() {
         repaint();
     }
-	
+
+
 }

@@ -43,5 +43,5 @@ public abstract class Canvas extends JPanel implements Helper, KeyListener{
     protected abstract void onKeyPressed(KeyEvent event);
     
     protected abstract void onDraw(Graphics2D g2D);
-	
+
 }
